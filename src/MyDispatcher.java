@@ -1,13 +1,14 @@
 /* Implement this class. */
 
 import java.util.List;
+import java.util.Objects;
 
 public class MyDispatcher extends Dispatcher {
 
     public MyDispatcher(SchedulingAlgorithm algorithm, List<Host> hosts) {
         super(algorithm, hosts);
     }
-
+    Object lock = new Object();
     int n = hosts.size();
     int previous_node_index = 0;
     @Override
@@ -36,16 +37,16 @@ public class MyDispatcher extends Dispatcher {
             previous_node_index = (previous_node_index + 1) % n;
 
         } else if(algorithm == SchedulingAlgorithm.LEAST_WORK_LEFT) {
-            long min = hosts.get(0).getWorkLeft() / 1000;
-            int min_index = 0;
-            for(int i = 1; i < n; i++) {
-                if(hosts.get(i).getWorkLeft() / 1000 < min) {
-                    min = hosts.get(i).getWorkLeft();
-                    min_index = i;
+            synchronized (lock) {
+                int min_index = 0;
+                for (int i = 1; i < n; i++) {
+                    if (Math.round(hosts.get(i).getWorkLeft() / 1000.0) < Math.round(hosts.get(min_index).getWorkLeft() / 1000.0)) {
+                        min_index = i;
+                    }
                 }
-            }
 
-            hosts.get(min_index).addTask(task);
+                hosts.get(min_index).addTask(task);
+            }
         }
     }
 

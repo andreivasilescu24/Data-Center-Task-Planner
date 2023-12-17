@@ -1,52 +1,42 @@
 /* Implement this class. */
 
 import java.util.Comparator;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class MyHost extends Host {
     public PriorityBlockingQueue<Task> queue = new PriorityBlockingQueue<>(10, new Comparator<Task>() {
         @Override
         public int compare(Task t1, Task t2) {
-            if(t1.getPriority() > t2.getPriority()) {
-                return -1;
-            } else if(t1.getPriority() < t2.getPriority()) {
-                return 1;
-            } else {
-                if(t1.getStart() > t2.getStart()) {
-                    return 1;
-                } else if(t1.getStart() < t2.getStart()) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
+            return comparator(t1, t2);
         }
     });
+
+    private int comparator(Task t1, Task t2) {
+        if(t1.getPriority() > t2.getPriority()) {
+            return -1;
+        } else if(t1.getPriority() < t2.getPriority()) {
+            return 1;
+        } else {
+            if(t1.getStart() > t2.getStart()) {
+                return 1;
+            } else if(t1.getStart() < t2.getStart()) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    }
 
     public PriorityBlockingQueue<Task> preemptedTasks = new PriorityBlockingQueue<>(10, new Comparator<Task>() {
         @Override
         public int compare(Task t1, Task t2) {
-            if(t1.getPriority() > t2.getPriority()) {
-                return -1;
-            } else if(t1.getPriority() < t2.getPriority()) {
-                return 1;
-            } else {
-                if(t1.getStart() > t2.getStart()) {
-                    return 1;
-                } else if(t1.getStart() < t2.getStart()) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
+            return comparator(t1, t2);
         }
     });
     public Task runningTask = null;
     long timeMoment;
     long runningTaskTime;
     boolean shutdown = false;
-    boolean a = false;
     long workLeft = 0;
 
     @Override
@@ -64,7 +54,6 @@ public class MyHost extends Host {
                 }
             } else {
                 workLeft -= (timeMoment - runningTaskTime);
-
                 if(runningTask.getLeft() <= 0) {
                     runningTask.finish();
                     runningTask = null;
@@ -75,7 +64,7 @@ public class MyHost extends Host {
                     if(runningTask.isPreemptible() && queue.size() != 0 && queue.peek().getPriority() > runningTask.getPriority()) {
                         preemptedTasks.add(runningTask);
                         runningTask = queue.poll();
-                        runningTaskTime = timeMoment;
+//                        runningTaskTime = timeMoment;
                     }
                 }
             }
@@ -84,7 +73,7 @@ public class MyHost extends Host {
     }
 
     @Override
-    public void addTask(Task task) {
+    public synchronized void addTask(Task task) {
         workLeft += task.getDuration();
         queue.add(task);
     }
@@ -95,7 +84,7 @@ public class MyHost extends Host {
     }
 
     @Override
-    public long getWorkLeft() {
+    public synchronized long getWorkLeft() {
         return workLeft;
     }
 
@@ -104,7 +93,4 @@ public class MyHost extends Host {
         shutdown = true;
     }
 
-    public Task getRunningTask() {
-        return runningTask;
-    }
 }
