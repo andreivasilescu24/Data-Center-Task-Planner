@@ -2,6 +2,7 @@
 
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MyHost extends Host {
     public PriorityBlockingQueue<Task> queue = new PriorityBlockingQueue<>(10, new Comparator<Task>() {
@@ -33,10 +34,10 @@ public class MyHost extends Host {
             return comparator(t1, t2);
         }
     });
-    public Task runningTask = null;
+    public volatile Task runningTask = null;
     long timeMoment;
     long runningTaskTime;
-    boolean shutdown = false;
+    public volatile boolean shutdown = false;
     long workLeft = 0;
 
     @Override
@@ -53,7 +54,6 @@ public class MyHost extends Host {
                     runningTaskTime = timeMoment;
                 }
             } else {
-                workLeft -= (timeMoment - runningTaskTime);
                 if(runningTask.getLeft() <= 0) {
                     runningTask.finish();
                     runningTask = null;
@@ -64,7 +64,6 @@ public class MyHost extends Host {
                     if(runningTask.isPreemptible() && queue.size() != 0 && queue.peek().getPriority() > runningTask.getPriority()) {
                         preemptedTasks.add(runningTask);
                         runningTask = queue.poll();
-//                        runningTaskTime = timeMoment;
                     }
                 }
             }
@@ -73,8 +72,7 @@ public class MyHost extends Host {
     }
 
     @Override
-    public synchronized void addTask(Task task) {
-        workLeft += task.getDuration();
+    public void addTask(Task task) {
         queue.add(task);
     }
 
@@ -84,7 +82,17 @@ public class MyHost extends Host {
     }
 
     @Override
-    public synchronized long getWorkLeft() {
+    public long getWorkLeft() {
+        workLeft = 0;
+        for(Task task : queue) {
+            workLeft += task.getLeft();
+        }
+        for(Task task : preemptedTasks) {
+            workLeft += task.getLeft();
+        }
+        if(runningTask != null) {
+            workLeft += runningTask.getLeft();
+        }
         return workLeft;
     }
 
