@@ -1,5 +1,3 @@
-/* Implement this class. */
-
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
