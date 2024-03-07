@@ -46,10 +46,9 @@ task-ul primit.
 
 * Cazul ROUND_ROBIN:
 In acest caz voi asigna task-ul catre host-ul cu index-ul egal cu valoare lui "previous_node_index". Aceasta variabila incepe cu valoare 0 deoarece algoritmul asigneaza 
-prima data catre index-ul 0, iar apoi, dupa fiecare asignare de task, valoarea variabilei este recalculata in functie de vechea valoare a acesteia dupa formula sugerata 
-in enunt "(previous_node_index + 1) % n".
+prima data catre index-ul 0, iar apoi, dupa fiecare asignare de task, valoarea variabilei este recalculata in functie de vechea valoare a acesteia "(previous_node_index + 1) % n".
 
 * Cazul LEAST_WORK_LEFT:
 In acest caz voi calcula, similar ca la SHORTEST_QUEUE, ce host are cea mai putina munca de facut si ii voi asigna acestuia noul task. Calcularea acestui minim este bazata 
-pe valoarea intoarsa de functia getWorkLeft() din fiecare host pe care o impart la 1000.0 si o rotunjesc mai apoi pentru a nu exista cazuri de genul 2.9 secunde vs 2.95 secunde,
-asa cum este indicat si in enunt. Astfel compararea se va face la nivel de secunde.
+pe valoarea intoarsa de functia getWorkLeft() din fiecare host pe care o impart la 1000.0 si o rotunjesc mai apoi pentru a nu exista cazuri de genul 2.9 secunde vs 2.95 secunde.
+Astfel compararea se va face la nivel de secunde.
